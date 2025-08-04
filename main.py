@@ -1,22 +1,27 @@
 # Import Classes
-from player import Player
-from host import Host
+from NumberGuess.player import PlayerClass
+from NumberGuess.host import HostClass
+from NumberGuess.NuGuMessages import NuGuMessagesClass
 
-# Welcome print
-print("Welcome to the number guessing game!\n")
+# Game Banner
+print(NuGuMessagesClass.banner("NumberGuess"))
 
 # Create player
-mainPlayer = Player(name=input("Your nickname\n> "))
+mainPlayer = PlayerClass(name=input("Your nickname\n>> "))
 print("\n")
 
 # Create Host
-gameHost = Host()
-
+gameHost = HostClass()
+print(gameHost.number)
 # Main Game Loop
-print("Try to guess the number I chose...")
+isFirstTry = True
 while mainPlayer.current_lifes > 0:
-    print(f"Remaining lifes: {mainPlayer.current_lifes}")
-    playerAnswer = int(input("> "))
+    # Asks for guess
+    NuGuMessagesClass.askForGuess(mainPlayer.current_lifes, isFirstTry=isFirstTry)
+    isFirstTry = False
+    playerAnswer = int(input(">> "))
+
+    # Checks boundaries
     if playerAnswer == -1:
         break
     elif playerAnswer < 1 or playerAnswer > 100:
@@ -24,22 +29,25 @@ while mainPlayer.current_lifes > 0:
         print("Try again")
         continue
 
-
-    match gameHost.checkAnswer(playerAnswer):
+    # Checks answer
+    answerResult = gameHost.checkAnswer(playerAnswer)
+    
+    # Print answer message + change game state based on result
+    NuGuMessagesClass.guessMessageResult(answerResult)
+    print(NuGuMessagesClass.separator())
+    match answerResult:
         case 1:
-            print("Too high! Guess again")
             mainPlayer.decreaseLife()
             continue
         case -1:
-            print("Too low... guess again!")
             mainPlayer.decreaseLife()
             continue
         case 0:
-            print("PERFECT! Congratulations for guessing right! But I just chose another one...")
             mainPlayer.changeScore(1)
             mainPlayer.resetLifes()
             gameHost.generateNumber()
+            print(gameHost.number)
             continue
 
-print("Well, well, well... let's see your results...")
-print(f"Final score: {mainPlayer.score}")
+# Prints final message
+NuGuMessagesClass.finalScore(playerName=mainPlayer.name, score=mainPlayer.score)
